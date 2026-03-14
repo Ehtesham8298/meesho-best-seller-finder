@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 440px;
+      max-height: 600px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fafafa;
+      color: #333;
+      overflow-y: auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #570A57, #9B1A9B);
+      color: white;
+      padding: 16px 18px;
+      position: relative;
+    }
+    .header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+    .header p { font-size: 11px; opacity: 0.8; margin-top: 4px; }
+    .version {
+      position: absolute; top: 8px; right: 12px;
+      font-size: 9px; opacity: 0.5;
+    }
+
+    /* URL Input */
+    .url-section {
+      padding: 12px 14px;
+      background: white;
+      border-bottom: 1px solid #eee;
+    }
+    .url-section label {
+      font-size: 11px; font-weight: 600; color: #888;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      display: block; margin-bottom: 6px;
+    }
+    .url-input-row { display: flex; gap: 8px; }
+    #urlInput {
+      flex: 1; padding: 9px 12px;
+      border: 2px solid #e0e0e0; border-radius: 8px;
+      font-size: 12px; outline: none;
+      transition: border-color 0.2s;
+    }
+    #urlInput:focus { border-color: #570A57; }
+    #urlInput::placeholder { color: #bbb; }
+    .or-text {
+      font-size: 10px; color: #aaa; text-align: center;
+      margin: 8px 0 4px; text-transform: uppercase;
+    }
+    .current-page-btn {
+      width: 100%; padding: 8px;
+      background: #f3e5f5; color: #570A57;
+      border: 1px dashed #ce93d8; border-radius: 8px;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    .current-page-btn:hover { background: #e1bee7; }
+
+    /* Seller Info Card */
+    .seller-info {
+      background: white;
+      margin: 10px 14px;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      display: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .seller-info h2 {
+      font-size: 15px; margin-bottom: 10px; color: #570A57;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .seller-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px;
+      text-align: center;
+    }
+    .stat {
+      background: linear-gradient(135deg, #f8f0f8, #faf5fa);
+      padding: 8px 4px; border-radius: 8px;
+    }
+    .stat-val { font-size: 15px; font-weight: 700; color: #570A57; }
+    .stat-label { font-size: 9px; color: #999; margin-top: 2px; text-transform: uppercase; }
+
+    /* Scan Button */
+    .actions { padding: 10px 14px 6px; }
+    #scanBtn {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #570A57, #7B0E7B);
+      color: white; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; letter-spacing: 0.3px;
+      box-shadow: 0 3px 10px rgba(87,10,87,0.3);
+    }
+    #scanBtn:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(87,10,87,0.4); }
+    #scanBtn:disabled {
+      background: #bbb; cursor: not-allowed;
+      transform: none; box-shadow: none;
+    }
+
+    /* Progress */
+    .progress { padding: 10px 14px; display: none; }
+    .progress-bar {
+      height: 8px; background: #eee;
+      border-radius: 4px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #570A57, #9B1A9B, #570A57);
+      background-size: 200% 100%;
+      border-radius: 4px; width: 0%;
+      transition: width 0.4s ease;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .progress-text {
+      font-size: 11px; color: #888;
+      margin-top: 6px; text-align: center;
+    }
+    .progress-stats {
+      display: flex; justify-content: space-between;
+      margin-top: 4px; font-size: 10px; color: #aaa;
+    }
+
+    /* Results */
+    .results {
+      padding: 0 14px 10px;
+      display: none;
+    }
+    .results h3 {
+      font-size: 11px; color: #888;
+      margin: 12px 0 8px; text-transform: uppercase;
+      letter-spacing: 0.8px; font-weight: 700;
+    }
+
+    .product-card {
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .product-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    .product-card.best {
+      border-color: #570A57;
+      box-shadow: 0 2px 12px rgba(87,10,87,0.15);
+      background: linear-gradient(135deg, #fef9fe, #fff);
+    }
+    .product-card.worst {
+      border-color: #ffcdd2;
+      background: #fff8f8;
+    }
+    .best-badge {
+      position: absolute; top: -9px; right: 12px;
+      background: linear-gradient(135deg, #570A57, #9B1A9B);
+      color: white; font-size: 9px; font-weight: 800;
+      padding: 3px 10px; border-radius: 12px;
+      letter-spacing: 0.5px;
+    }
+    .product-rank {
+      font-size: 10px; color: #bbb; font-weight: 700;
+    }
+    .product-name {
+      font-size: 13px; font-weight: 600;
+      margin: 3px 0; color: #333; line-height: 1.3;
+    }
+    .product-meta {
+      display: flex; gap: 10px; margin-top: 6px;
+      flex-wrap: wrap; align-items: center;
+    }
+    .meta-chip {
+      font-size: 11px; padding: 3px 8px;
+      border-radius: 6px; font-weight: 600;
+    }
+    .chip-price { background: #f5f5f5; color: #333; }
+    .chip-rating { background: #e8f5e9; color: #2e7d32; }
+    .chip-ratings { background: #e3f2fd; color: #1565c0; }
+    .chip-reviews { background: #fff3e0; color: #e65100; }
+    .chip-bad { background: #ffebee; color: #c62828; }
+    .breakdown {
+      font-size: 10px; color: #999;
+      margin-top: 4px; width: 100%;
+    }
+    .product-link {
+      display: inline-block; margin-top: 6px;
+      font-size: 11px; color: #570A57;
+      text-decoration: none; font-weight: 700;
+    }
+    .product-link:hover { text-decoration: underline; }
+
+    /* Error */
+    .error { padding: 10px 14px; display: none; }
+    .error-box {
+      background: #fff0f0; border: 1px solid #ffcdd2;
+      color: #c62828; padding: 12px 14px;
+      border-radius: 10px; font-size: 12px;
+      text-align: center;
+    }
+
+    /* Info Notes */
+    .info-note {
+      border-radius: 10px; padding: 10px 14px;
+      margin-top: 8px; font-size: 12px;
+      text-align: center; font-weight: 600;
+    }
+    .note-orange { background: #fff3e0; border: 1px solid #ffe0b2; color: #e65100; }
+    .note-green { background: #e8f5e9; border: 1px solid #c8e6c9; color: #2e7d32; }
+
+    /* Download */
+    .download-btn {
+      display: block; width: calc(100% - 28px);
+      margin: 8px 14px 14px; padding: 10px;
+      background: white; color: #570A57;
+      border: 2px solid #570A57; border-radius: 10px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      text-align: center; transition: all 0.2s;
+    }
+    .download-btn:hover { background: #570A57; color: white; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Meesho Best Seller Finder</h1>
+    <p>Find the most sold product of any seller</p>
+    <span class="version">v2.0</span>
+  </div>
+
+  <div class="url-section">
+    <label>Seller Page URL</label>
+    <div class="url-input-row">
+      <input type="text" id="urlInput" placeholder="https://www.meesho.com/SellerName" />
+    </div>
+    <div class="or-text">or</div>
+    <button class="current-page-btn" id="useCurrentBtn">Use Current Tab</button>
+  </div>
+
+  <div class="seller-info" id="sellerInfo">
+    <h2 id="sellerName">Seller Store</h2>
+    <div class="seller-stats">
+      <div class="stat">
+        <div class="stat-val" id="sellerRating">-</div>
+        <div class="stat-label">Rating</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="sellerRatings">-</div>
+        <div class="stat-label">Ratings</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="sellerFollowers">-</div>
+        <div class="stat-label">Followers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="sellerProducts">-</div>
+        <div class="stat-label">Products</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions" id="actions">
+    <button id="scanBtn">Scan All Products</button>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text" id="progressText">Starting scan...</div>
+    <div class="progress-stats">
+      <span id="progressProducts">0 products</span>
+      <span id="progressTime">0s</span>
+    </div>
+  </div>
+
+  <div class="error" id="error">
+    <div class="error-box" id="errorText"></div>
+  </div>
+
+  <div class="results" id="results"></div>
+  <button class="download-btn" id="downloadBtn" style="display:none">Download All Products as CSV</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>

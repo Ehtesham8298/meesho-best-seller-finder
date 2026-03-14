@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Meesho Best Seller Finder",
+  "version": "1.0",
+  "description": "Find the best selling product of any Meesho seller. Open a seller page and click the extension.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["https://www.meesho.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon.png"
+    }
+  },
+  "icons": {
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
