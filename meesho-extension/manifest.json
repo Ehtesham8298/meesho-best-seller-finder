@@ -1,15 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "Meesho Best Seller Finder",
-  "version": "1.0",
-  "description": "Find the best selling product of any Meesho seller. Open a seller page and click the extension.",
-  "permissions": ["activeTab", "scripting"],
+  "name": "Meesho Seller Tools",
+  "version": "2.1",
+  "description": "Best Seller Finder + Keyword Research & SEO Optimizer for Meesho sellers.",
+  "permissions": ["activeTab", "scripting", "sidePanel"],
   "host_permissions": ["https://www.meesho.com/*"],
   "action": {
-    "default_popup": "popup.html",
     "default_icon": {
       "48": "icon.png"
     }
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "icons": {
     "48": "icon.png",

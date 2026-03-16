@@ -5,8 +5,8 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      width: 440px;
-      max-height: 600px;
+      width: 100%;
+      height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #fafafa;
       color: #333;
@@ -222,6 +222,193 @@
     }
     .download-btn:hover { background: #570A57; color: white; }
 
+    /* Tabs */
+    .tab-nav {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #eee;
+    }
+    .tab-btn {
+      flex: 1; padding: 10px 8px;
+      background: none; border: none;
+      font-size: 12px; font-weight: 700;
+      color: #999; cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: #570A57;
+      border-bottom-color: #570A57;
+    }
+    .tab-btn:hover { color: #570A57; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* SEO Tools */
+    .seo-section {
+      padding: 12px 14px;
+    }
+    .seo-section-title {
+      font-size: 12px; font-weight: 700; color: #570A57;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+    .seo-input-row {
+      display: flex; gap: 8px; margin-bottom: 10px;
+    }
+    .seo-input {
+      flex: 1; padding: 9px 12px;
+      border: 2px solid #e0e0e0; border-radius: 8px;
+      font-size: 12px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .seo-input:focus { border-color: #570A57; }
+    .seo-btn {
+      padding: 9px 16px;
+      background: linear-gradient(135deg, #570A57, #7B0E7B);
+      color: white; border: none; border-radius: 8px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .seo-btn:hover { transform: translateY(-1px); }
+    .seo-btn:disabled { background: #bbb; cursor: not-allowed; transform: none; }
+    .seo-btn-outline {
+      padding: 9px 16px;
+      background: white; color: #570A57;
+      border: 2px solid #570A57; border-radius: 8px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .seo-btn-outline:hover { background: #570A57; color: white; }
+
+    /* Keyword Tags */
+    .keyword-cloud {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-top: 8px;
+    }
+    .keyword-tag {
+      padding: 5px 10px;
+      border-radius: 16px;
+      font-size: 11px; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid;
+    }
+    .keyword-tag:hover { transform: translateY(-1px); }
+    .tag-purple { background: #f3e5f5; color: #570A57; border-color: #ce93d8; }
+    .tag-blue { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
+    .tag-green { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+    .tag-orange { background: #fff3e0; color: #e65100; border-color: #ffcc80; }
+
+    /* Keyword Table */
+    .keyword-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 11px;
+    }
+    .keyword-table th {
+      background: #f5f5f5;
+      padding: 6px 8px;
+      text-align: left;
+      font-weight: 700;
+      color: #666;
+      border-bottom: 2px solid #eee;
+    }
+    .keyword-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .keyword-table tr:hover { background: #faf5fa; }
+
+    /* Title Optimizer */
+    .title-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      resize: none;
+      min-height: 60px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .title-input:focus { border-color: #570A57; }
+    .title-stats {
+      display: flex; justify-content: space-between;
+      margin-top: 6px; font-size: 10px; color: #999;
+    }
+    .seo-score-bar {
+      height: 10px; background: #eee;
+      border-radius: 5px; overflow: hidden;
+      margin-top: 8px;
+    }
+    .seo-score-fill {
+      height: 100%; border-radius: 5px;
+      transition: width 0.4s ease, background 0.4s;
+    }
+    .score-label {
+      font-size: 18px; font-weight: 800;
+      text-align: center; margin-top: 6px;
+    }
+    .seo-tips {
+      margin-top: 10px;
+      list-style: none;
+    }
+    .seo-tips li {
+      font-size: 11px;
+      padding: 5px 0;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tip-icon {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .tip-pass { background: #e8f5e9; color: #2e7d32; }
+    .tip-fail { background: #ffebee; color: #c62828; }
+    .tip-warn { background: #fff3e0; color: #e65100; }
+
+    /* Competitor card */
+    .competitor-card {
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+    }
+    .competitor-title {
+      font-size: 12px; font-weight: 600;
+      color: #333; line-height: 1.3;
+    }
+    .competitor-meta {
+      display: flex; gap: 8px; margin-top: 4px;
+      font-size: 10px; color: #888;
+    }
+
+    /* Copy notification */
+    .copy-toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #333; color: white;
+      padding: 8px 16px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      opacity: 0; transition: opacity 0.3s;
+      z-index: 999;
+    }
+    .copy-toast.show { opacity: 1; }
+
+    /* Divider */
+    .seo-divider {
+      height: 1px; background: #eee;
+      margin: 4px 14px;
+    }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -231,11 +418,17 @@
 </head>
 <body>
   <div class="header">
-    <h1>Meesho Best Seller Finder</h1>
-    <p>Find the most sold product of any seller</p>
+    <h1>Meesho Seller Tools</h1>
+    <p>Best Seller Finder + SEO Optimizer</p>
     <span class="version">v2.0</span>
   </div>
 
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="seller">Best Seller Finder</button>
+    <button class="tab-btn" data-tab="seo">SEO Tools</button>
+  </div>
+
+  <div class="tab-content active" id="tab-seller">
   <div class="url-section">
     <label>Seller Page URL</label>
     <div class="url-input-row">
@@ -288,6 +481,88 @@
 
   <div class="results" id="results"></div>
   <button class="download-btn" id="downloadBtn" style="display:none">Download All Products as CSV</button>
+  </div>
+
+  <div class="tab-content" id="tab-seo">
+    <!-- Auto Title Generator -->
+    <div class="seo-section">
+      <div class="seo-section-title" style="font-size:13px;">Auto Title Generator</div>
+      <p style="font-size:11px;color:#888;margin-bottom:8px;">Keywords generate → Har keyword pe pages scroll → Top rated products ka FULL title nikale</p>
+      <div class="seo-input-row">
+        <input type="text" class="seo-input" id="autoTitleInput" placeholder="e.g. face fan, kurti, earphones" style="flex:1;">
+        <button class="seo-btn" id="autoTitleBtn">Generate</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <label style="font-size:10px;color:#570A57;font-weight:600;white-space:nowrap;">Keywords:</label>
+          <input type="number" id="maxKeywordsInput" value="40" min="5" max="100" step="5" style="width:55px;padding:4px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:center;">
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <label style="font-size:10px;color:#570A57;font-weight:600;white-space:nowrap;">Pages:</label>
+          <input type="number" id="maxPagesInput" value="10" min="1" max="20" step="1" style="width:55px;padding:4px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:center;">
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <label style="font-size:10px;color:#570A57;font-weight:600;white-space:nowrap;">Min Ratings:</label>
+          <input type="number" id="minRatingInput" value="500" min="1" max="50000" step="50" style="width:55px;padding:4px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:center;">
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <label style="font-size:10px;color:#570A57;font-weight:600;white-space:nowrap;">Top Products:</label>
+          <input type="number" id="topProductInput" value="20" min="5" max="100" step="5" style="width:55px;padding:4px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:center;">
+        </div>
+      </div>
+      <p style="font-size:9px;color:#888;margin-top:4px;">Keywords = kitne search kare | Pages = har keyword pe kitna scroll | Min Ratings = filter | Top Products = kitne best sellers open kare</p>
+      <div id="autoTitleResults"></div>
+    </div>
+
+    <div class="seo-divider"></div>
+
+    <!-- Keyword Research -->
+    <div class="seo-section">
+      <div class="seo-section-title">Keyword Research</div>
+      <div class="seo-input-row">
+        <input type="text" class="seo-input" id="keywordInput" placeholder="Enter seed keyword (e.g. kurti, saree)">
+        <button class="seo-btn" id="keywordSearchBtn">Search</button>
+      </div>
+      <div id="autocompleteResults"></div>
+    </div>
+
+    <div class="seo-divider"></div>
+
+    <!-- Competitor Analysis -->
+    <div class="seo-section">
+      <div class="seo-section-title">Competitor Keyword Analysis</div>
+      <p style="font-size:11px;color:#888;margin-bottom:8px;">Analyzes top products' titles for a keyword to find winning words</p>
+      <div class="seo-input-row">
+        <input type="text" class="seo-input" id="competitorInput" placeholder="Enter product keyword (e.g. kurti)">
+        <button class="seo-btn" id="competitorBtn">Analyze</button>
+      </div>
+      <div id="competitorResults"></div>
+    </div>
+
+    <div class="seo-divider"></div>
+
+    <!-- Title Optimizer -->
+    <div class="seo-section">
+      <div class="seo-section-title">Title Optimizer</div>
+      <textarea class="title-input" id="titleInput" placeholder="Paste or type your product title here..."></textarea>
+      <div class="title-stats">
+        <span id="titleCharCount">0 / 200 characters</span>
+        <span id="titleWordCount">0 words</span>
+      </div>
+      <div class="seo-score-bar">
+        <div class="seo-score-fill" id="seoScoreFill" style="width:0%"></div>
+      </div>
+      <div class="score-label" id="seoScoreLabel">-</div>
+      <div id="seoKeywordsUsed" style="margin-top:6px"></div>
+      <ul class="seo-tips" id="seoTips"></ul>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button class="seo-btn" id="optimizeTitleBtn">Analyze Title</button>
+        <button class="seo-btn-outline" id="copyTitleBtn">Copy Title</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-toast" id="copyToast">Copied!</div>
 
   <script src="popup.js"></script>
 </body>
