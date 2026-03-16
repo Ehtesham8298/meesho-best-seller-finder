@@ -23,10 +23,7 @@ document.getElementById("keywordSearchBtn").addEventListener("click", fetchAutoc
 document.getElementById("keywordInput").addEventListener("keydown", (e) => {
   if (e.key === "Enter") fetchAutocomplete();
 });
-document.getElementById("competitorBtn").addEventListener("click", analyzeCompetitors);
-document.getElementById("competitorInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") analyzeCompetitors();
-});
+// Competitor Analysis removed
 document.getElementById("optimizeTitleBtn").addEventListener("click", analyzeTitle);
 document.getElementById("titleInput").addEventListener("input", updateTitleStats);
 document.getElementById("copyTitleBtn").addEventListener("click", () => {
@@ -1022,7 +1019,13 @@ function generateVariations(seed) {
 
   // Build modifier list based on category
   const allModifiers = [];
-  allModifiers.push(...audiences);
+
+  // Audience modifiers ONLY for clothing/accessories (not electronics/home)
+  const isGenderRelevant = isClothing || isAccessory;
+  if (isGenderRelevant) {
+    allModifiers.push(...audiences);
+  }
+
   allModifiers.push(...prices);
   allModifiers.push(...packs);
   allModifiers.push(...styles);
@@ -1034,14 +1037,21 @@ function generateVariations(seed) {
     allModifiers.push(...sizes);
   } else if (isElectronics) {
     allModifiers.push(...features);
+    // Electronics-specific: USE CASE based keywords instead of audience
+    allModifiers.push(...["home", "office", "travel", "outdoor", "car", "desk", "table", "wall mount", "ceiling", "standing"]);
+    allModifiers.push(...["high speed", "low noise", "silent", "powerful", "3 speed", "5 speed"]);
+    allModifiers.push(...["with light", "with stand", "with clip", "with battery", "with charger"]);
+    allModifiers.push(...sizes);
   } else if (isAccessory) {
     allModifiers.push(...materials.filter((m) => ["leather", "steel", "metal", "wooden", "plastic"].includes(m)));
     allModifiers.push(...occasions.filter((m) => ["party wear", "daily use", "wedding", "festive", "casual"].includes(m)));
+    allModifiers.push(...sizes);
   } else if (isHome) {
     allModifiers.push(...materials.filter((m) => ["cotton", "polyester", "steel", "plastic", "wooden"].includes(m)));
     allModifiers.push(...sizes);
+    allModifiers.push(...["kitchen", "bedroom", "bathroom", "living room", "balcony", "outdoor"]);
   } else {
-    // Generic - add a bit of everything
+    // Generic - add a bit of everything but NO audiences
     allModifiers.push(...materials.slice(0, 5));
     allModifiers.push(...occasions.slice(0, 4));
     allModifiers.push(...features.slice(0, 4));
@@ -1055,66 +1065,94 @@ function generateVariations(seed) {
   const prefixes = ["best", "stylish", "cotton", "printed", "mini", "portable", "latest", "trendy", "top", "new", "cheap", "premium", "branded", "original"];
   prefixes.forEach((mod) => variations.add(mod + " " + seed));
 
-  // === LEVEL 3: seed + audience + price (e.g. "trimmer for men under 500") ===
-  const topAudiences = ["for women", "for men", "for girls", "for boys", "for kids"];
+  // === LEVEL 3: Cross combos based on category ===
   const topPrices = ["under 500", "under 300", "under 200", "under 1000"];
-  topAudiences.forEach((aud) => {
-    topPrices.forEach((price) => {
-      variations.add(seed + " " + aud + " " + price);
-    });
-  });
 
-  // === LEVEL 4: seed + audience + material/feature (e.g. "trimmer USB for men") ===
-  if (isClothing) {
-    ["women", "men", "girls"].forEach((aud) => {
-      ["cotton", "silk", "printed", "embroidered", "rayon", "georgette"].forEach((mat) => {
-        variations.add(seed + " " + mat + " for " + aud);
+  if (isGenderRelevant) {
+    // Clothing/Accessories: audience + price combos make sense
+    const topAudiences = ["for women", "for men", "for girls", "for boys", "for kids"];
+    topAudiences.forEach((aud) => {
+      topPrices.forEach((price) => {
+        variations.add(seed + " " + aud + " " + price);
       });
     });
-    // seed + occasion + audience
-    ["party wear", "casual", "wedding", "office", "daily use"].forEach((occ) => {
-      ["women", "men"].forEach((aud) => {
-        variations.add(seed + " " + occ + " for " + aud);
+
+    // === LEVEL 4: seed + audience + material ===
+    if (isClothing) {
+      ["women", "men", "girls"].forEach((aud) => {
+        ["cotton", "silk", "printed", "embroidered", "rayon", "georgette"].forEach((mat) => {
+          variations.add(seed + " " + mat + " for " + aud);
+        });
       });
-    });
-  } else if (isElectronics) {
-    ["men", "women", "kids"].forEach((aud) => {
-      ["USB", "rechargeable", "wireless", "Bluetooth", "mini", "portable"].forEach((feat) => {
-        variations.add(seed + " " + feat + " for " + aud);
+      ["party wear", "casual", "wedding", "office", "daily use"].forEach((occ) => {
+        ["women", "men"].forEach((aud) => {
+          variations.add(seed + " " + occ + " for " + aud);
+        });
       });
-    });
-  } else if (isAccessory) {
-    ["women", "men", "girls"].forEach((aud) => {
-      ["leather", "steel", "metal", "premium", "stylish"].forEach((mat) => {
-        variations.add(seed + " " + mat + " for " + aud);
+    } else if (isAccessory) {
+      ["women", "men", "girls"].forEach((aud) => {
+        ["leather", "steel", "metal", "premium", "stylish"].forEach((mat) => {
+          variations.add(seed + " " + mat + " for " + aud);
+        });
       });
-    });
-  } else if (isHome) {
-    ["cotton", "polyester", "steel", "plastic", "wooden"].forEach((mat) => {
-      ["large", "small", "medium"].forEach((sz) => {
-        variations.add(seed + " " + mat + " " + sz);
+    }
+
+    // LEVEL 6: intent + audience
+    ["best", "top rated", "most selling", "new arrival"].forEach((intent) => {
+      ["for women", "for men", "for girls"].forEach((aud) => {
+        variations.add(intent + " " + seed + " " + aud);
       });
     });
   } else {
-    // Generic cross combos
-    topAudiences.forEach((aud) => {
-      ["premium", "stylish", "best", "latest", "branded"].forEach((adj) => {
-        variations.add(adj + " " + seed + " " + aud);
+    // Electronics/Home/Generic: USE CASE + price combos (no gender)
+    const useCases = isElectronics
+      ? ["home", "office", "travel", "outdoor", "car", "desk", "kitchen", "bedroom"]
+      : isHome
+      ? ["kitchen", "bedroom", "bathroom", "living room", "balcony"]
+      : ["home", "office", "outdoor", "travel", "daily use"];
+
+    useCases.forEach((place) => {
+      variations.add(seed + " for " + place);
+      topPrices.slice(0, 2).forEach((price) => {
+        variations.add(seed + " for " + place + " " + price);
+      });
+    });
+
+    // Electronics: feature + use case combos
+    if (isElectronics) {
+      ["USB", "rechargeable", "wireless", "portable", "mini"].forEach((feat) => {
+        useCases.slice(0, 4).forEach((place) => {
+          variations.add(seed + " " + feat + " " + place);
+        });
+      });
+      // Speed/power variants
+      ["high speed", "silent", "powerful", "3 speed"].forEach((spec) => {
+        variations.add(seed + " " + spec);
+      });
+    }
+
+    // Home: material + room combos
+    if (isHome) {
+      ["cotton", "steel", "plastic", "wooden"].forEach((mat) => {
+        useCases.slice(0, 3).forEach((room) => {
+          variations.add(seed + " " + mat + " " + room);
+        });
+      });
+    }
+
+    // Intent combos (no audience)
+    ["best", "top rated", "most selling", "new arrival"].forEach((intent) => {
+      variations.add(intent + " " + seed);
+      useCases.slice(0, 3).forEach((place) => {
+        variations.add(intent + " " + seed + " " + place);
       });
     });
   }
 
-  // === LEVEL 5: seed + style + pack (e.g. "trimmer combo stylish") ===
+  // === LEVEL 5: seed + style + pack ===
   ["combo", "set of 2", "pack of 2", "pack of 3"].forEach((pack) => {
     ["stylish", "premium", "best", "latest"].forEach((style) => {
       variations.add(seed + " " + pack + " " + style);
-    });
-  });
-
-  // === LEVEL 6: seed + intent + audience (e.g. "best trimmer for men") ===
-  ["best", "top rated", "most selling", "new arrival"].forEach((intent) => {
-    topAudiences.slice(0, 3).forEach((aud) => {
-      variations.add(intent + " " + seed + " " + aud);
     });
   });
 
@@ -1271,106 +1309,83 @@ async function fetchAutocomplete() {
   const container = document.getElementById("autocompleteResults");
   btn.disabled = true;
   btn.textContent = "Searching...";
-  container.innerHTML = '<p style="font-size:11px;color:#888;text-align:center;">Fetching keywords...</p>';
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    // Step 1: Try autocomplete API first
-    let suggestions = [];
-    try {
-      const apiResult = await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: fetchMeeshoSuggestions,
-        args: [keyword],
-      });
-      suggestions = apiResult[0].result || [];
-    } catch {}
+    // Step 1: Generate keyword variations (same as Auto Title Generator - reliable)
+    const analyzeCount = parseInt(document.getElementById("kwAnalyzeCount").value) || 15;
+    const allVariations = generateVariations(keyword);
+    const keywordsToAnalyze = allVariations.slice(0, analyzeCount);
+    cachedKeywords = allVariations; // Store all for keyword cloud
 
-    // Step 1b: If API failed, navigate to search page and extract from product titles
-    if (!suggestions || suggestions.length === 0) {
-      // Fallback: go to search page and extract real keywords from product names
-      const searchUrl = "https://www.meesho.com/search?q=" + encodeURIComponent(keyword);
-      await chrome.tabs.update(tab.id, { url: searchUrl });
-      await waitForPageLoad(tab.id);
-
-      // Scroll to load products
-      try { await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => window.scrollTo(0, 1000) }); } catch {}
-      await new Promise((r) => setTimeout(r, 2000));
-
-      const scrapeResult = await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: extractKeywordsFromSearch,
-        args: [keyword],
-      });
-      suggestions = scrapeResult[0].result || [];
-    }
-
-    // Step 1c: If scrape also failed, generate smart variations
-    if (!suggestions || suggestions.length === 0) {
-      suggestions = [
-        keyword, keyword + " for women", keyword + " for men",
-        keyword + " combo", keyword + " set", keyword + " pack of 2",
-        keyword + " latest design", keyword + " under 500",
-        keyword + " under 300", keyword + " stylish",
-        keyword + " printed", keyword + " cotton",
-        keyword + " trending", keyword + " online",
-      ].map((k) => ({ keyword: k }));
-    }
-
-    cachedKeywords = suggestions.map((s) => s.keyword || s);
-
-    if (cachedKeywords.length === 0) {
-      container.innerHTML = '<p style="font-size:11px;color:#888;text-align:center;">No suggestions found. Try a different keyword.</p>';
-      return;
-    }
-
-    // Step 2: Show keywords immediately while we fetch demand data
+    // Show keywords immediately
     container.innerHTML = renderKeywordResults(cachedKeywords, null);
+    container.innerHTML += `<p id="demandStatus" style="font-size:11px;color:#570A57;text-align:center;margin-top:8px;font-weight:600;">Analyzing demand for ${keywordsToAnalyze.length} keywords...</p>
+      <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" id="demandProgress" style="width:0%"></div></div>`;
 
-    // Step 3: Fetch demand data for top keywords (visit search pages)
-    container.innerHTML += '<p id="demandStatus" style="font-size:11px;color:#570A57;text-align:center;margin-top:8px;font-weight:600;">Fetching demand data for top keywords...</p>';
-
-    const keywordsToAnalyze = cachedKeywords.slice(0, 8); // Top 8
+    // Step 2: Visit each keyword's search page, use extractSearchProducts for real data
     const demandData = [];
 
     for (let i = 0; i < keywordsToAnalyze.length; i++) {
       const kw = keywordsToAnalyze[i];
       const statusEl = document.getElementById("demandStatus");
-      if (statusEl) statusEl.textContent = `Analyzing ${i + 1}/${keywordsToAnalyze.length}: ${kw}...`;
+      const progressEl = document.getElementById("demandProgress");
+      if (statusEl) statusEl.textContent = `Analyzing ${i + 1}/${keywordsToAnalyze.length}: "${kw}"...`;
+      if (progressEl) progressEl.style.width = `${Math.round(((i + 1) / keywordsToAnalyze.length) * 100)}%`;
 
       const searchUrl = "https://www.meesho.com/search?q=" + encodeURIComponent(kw);
       await chrome.tabs.update(tab.id, { url: searchUrl });
       await waitForPageLoad(tab.id);
-      // Scroll to load lazy content
-      try { await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => window.scrollTo(0, 1000) }); } catch {}
-      await new Promise((r) => setTimeout(r, 2000));
+      // Wait for products to load first
+      await new Promise((r) => setTimeout(r, 3000));
+      // Then scroll to load more products
+      try {
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }) });
+      } catch {}
+      // Wait for scrolled products to load
+      await new Promise((r) => setTimeout(r, 2500));
 
-      const demandResult = await chrome.scripting.executeScript({
+      // Use extractSearchProducts - same function that works in Auto Title Generator
+      const result = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: extractDemandSignals,
+        func: extractSearchProducts,
       });
 
-      const signals = demandResult[0].result || {};
+      const products = result[0].result || [];
+      // Filter relevant products only
+      const seedWords = keyword.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+      const relevant = products.filter((p) => {
+        const titleLower = (p.name || "").toLowerCase();
+        return seedWords.some((sw) => titleLower.includes(sw));
+      });
+
+      const prices = relevant.map((p) => p.price).filter((p) => p > 0);
+      const ratings = relevant.map((p) => p.ratingCount || 0).filter((r) => r > 0).sort((a, b) => b - a);
+      const topRating = ratings[0] || 0;
+      const totalRatingsTop5 = ratings.slice(0, 5).reduce((a, b) => a + b, 0);
+      const avgPrice = prices.length > 0 ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+
       demandData.push({
         keyword: kw,
-        totalProducts: signals.totalProducts || 0,
-        avgRatings: signals.avgRatings || 0,
-        topProductRatings: signals.topProductRatings || 0,
-        avgPrice: signals.avgPrice || 0,
-        demandScore: 0, // will calculate below
+        totalProducts: relevant.length,
+        avgRatings: topRating,
+        topProductRatings: totalRatingsTop5,
+        avgPrice,
+        demandScore: 0,
       });
+
+      await new Promise((r) => setTimeout(r, 500));
     }
 
     // Calculate demand score (0-100)
     const maxRatings = Math.max(...demandData.map((d) => d.topProductRatings), 1);
     const maxProducts = Math.max(...demandData.map((d) => d.totalProducts), 1);
     demandData.forEach((d) => {
-      // Higher top ratings = more demand, moderate product count = good opportunity
       const demandFromRatings = (d.topProductRatings / maxRatings) * 60;
-      const competitionPenalty = (d.totalProducts / maxProducts) * 20;
-      const ratingBonus = Math.min(d.avgRatings / 500, 1) * 20;
-      d.demandScore = Math.round(Math.min(demandFromRatings + ratingBonus - competitionPenalty + 40, 100));
+      const productBonus = Math.min(d.totalProducts / 10, 1) * 20; // More products = more demand
+      const ratingBonus = Math.min(d.avgRatings / 1000, 1) * 20;
+      d.demandScore = Math.round(Math.min(demandFromRatings + productBonus + ratingBonus, 100));
       d.demandScore = Math.max(d.demandScore, 5);
     });
 
@@ -1380,7 +1395,7 @@ async function fetchAutocomplete() {
     container.innerHTML = renderKeywordResults(cachedKeywords, demandData);
 
   } catch (err) {
-    container.innerHTML = `<p style="font-size:11px;color:#c62828;text-align:center;">Error: ${err.message}. Open meesho.com in current tab first.</p>`;
+    container.innerHTML = `<p style="font-size:11px;color:#c62828;text-align:center;">Error: ${err.message}. Meesho.com open karo pehle.</p>`;
   } finally {
     btn.disabled = false;
     btn.textContent = "Search";
@@ -1393,8 +1408,8 @@ function renderKeywordResults(keywords, demandData) {
   // Demand table (if available)
   if (demandData && demandData.length > 0) {
     html += '<div class="seo-section-title" style="font-size:11px;margin-bottom:4px;">Keyword Demand Analysis</div>';
-    html += '<p style="font-size:10px;color:#888;margin-bottom:6px;">Based on real Meesho data - top product ratings, competition & pricing</p>';
-    html += '<table class="keyword-table"><tr><th>Keyword</th><th>Demand</th><th>Products</th><th>Top Ratings</th><th>Avg Price</th></tr>';
+    html += '<p style="font-size:10px;color:#888;margin-bottom:6px;">Real Meesho search data - products found, top seller ratings, avg price</p>';
+    html += '<table class="keyword-table"><tr><th>Keyword</th><th>Demand</th><th>Products</th><th>#1 Seller Ratings</th><th>Avg Price</th></tr>';
     demandData.forEach((d) => {
       let demandColor, demandLabel;
       if (d.demandScore >= 70) { demandColor = "#2e7d32"; demandLabel = "HIGH"; }
@@ -1405,7 +1420,7 @@ function renderKeywordResults(keywords, demandData) {
         <td><strong>${escapeHtml(d.keyword)}</strong></td>
         <td><span style="color:${demandColor};font-weight:800;">${d.demandScore}</span> <span style="font-size:9px;color:${demandColor}">${demandLabel}</span></td>
         <td>${d.totalProducts.toLocaleString()}</td>
-        <td>${d.topProductRatings.toLocaleString()}</td>
+        <td>${d.avgRatings.toLocaleString()}</td>
         <td>Rs.${d.avgPrice}</td>
       </tr>`;
     });
@@ -1415,9 +1430,9 @@ function renderKeywordResults(keywords, demandData) {
     html += '<div style="height:8px"></div>';
   }
 
-  // Keyword cloud
-  html += '<div class="seo-section-title" style="font-size:11px;">All Keywords</div>';
-  html += '<div class="keyword-cloud">';
+  // Keyword cloud (scrollable)
+  html += `<div class="seo-section-title" style="font-size:11px;">All Keywords (${keywords.length})</div>`;
+  html += '<div class="keyword-cloud" style="max-height:200px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:8px;padding:8px;">';
   const tagColors = ["tag-purple", "tag-blue", "tag-green", "tag-orange"];
   keywords.forEach((kw, i) => {
     const color = tagColors[i % tagColors.length];
@@ -2018,6 +2033,32 @@ function analyzeTitle() {
   const charCount = title.length;
   const wordCount = title.split(/\s+/).length;
   const titleLower = title.toLowerCase();
+  const words = title.split(/[\s,\-|()\/]+/).filter((w) => w.length > 1);
+
+  // 0. Gibberish/spam detection - check if words are real
+  // Real words have vowels and consonants in normal patterns
+  // Gibberish like "vjhghgkg jhgjhguytrtruvvjb" has no vowels or random patterns
+  const realWordCount = words.filter((w) => {
+    if (w.length <= 2) return true; // short words are fine
+    const lower = w.toLowerCase();
+    // Must have at least 1 vowel per 4 consonants
+    const vowels = (lower.match(/[aeiou]/g) || []).length;
+    const consonants = (lower.match(/[bcdfghjklmnpqrstvwxyz]/g) || []).length;
+    if (consonants > 0 && vowels === 0) return false; // no vowels = gibberish
+    if (consonants > 4 * vowels) return false; // too many consonants
+    // Check for repeated chars (3+ same char in a row)
+    if (/(.)\1{2,}/.test(lower)) return false;
+    // Check for no repeating 2-char patterns
+    if (/(.{2})\1{2,}/.test(lower)) return false;
+    return true;
+  }).length;
+
+  const gibberishRatio = words.length > 0 ? (words.length - realWordCount) / words.length : 0;
+  if (gibberishRatio > 0.3) {
+    // More than 30% gibberish words - heavy penalty
+    score -= 40;
+    checks.push({ pass: false, text: `${words.length - realWordCount} gibberish/fake words detected! Use real product words only` });
+  }
 
   // 1. Title Length (20 points)
   if (charCount >= 80 && charCount <= 180) {
@@ -2082,31 +2123,49 @@ function analyzeTitle() {
     checks.push({ pass: "warn", text: "Consider adding pack size, quantity, or dimensions" });
   }
 
-  // 6. Has material/fabric/type descriptor (10 points)
-  const hasDescriptor = /(cotton|silk|georgette|rayon|polyester|crepe|chiffon|linen|wool|leather|steel|plastic|wooden|printed|embroidered|solid|striped|checked)/i.test(title);
-  if (hasDescriptor) {
+  // 6. Has descriptors - material/feature/spec (10 points)
+  // Check ALL types of descriptors - no category needed
+  const materialWords = (title.match(/(cotton|silk|georgette|rayon|polyester|crepe|chiffon|linen|wool|leather|steel|plastic|wooden|metal|rubber|nylon|acrylic|ceramic|glass|aluminium|iron|brass|copper|jute|velvet|satin|denim|fleece|foam|fiber)/gi) || []);
+  const featureWords = (title.match(/(USB|rechargeable|wireless|bluetooth|portable|mini|waterproof|adjustable|foldable|automatic|digital|LED|solar|magnetic|anti-slip|non-stick|BPA free|eco friendly|organic|handmade|machine washable|scratch proof|shockproof|dustproof)/gi) || []);
+  const specWords = (title.match(/(\d+\s*(ml|gm|kg|inch|cm|mm|ltr|meter|mtr|watt|volt|mAh|GB|MB|GSM|RPM|HP|W|V|A))/gi) || []);
+
+  const totalDescriptors = materialWords.length + featureWords.length + specWords.length;
+  if (totalDescriptors >= 3) {
     score += 10;
-    checks.push({ pass: true, text: "Has material/fabric info - great for search" });
+    checks.push({ pass: true, text: `Has ${totalDescriptors} descriptors (material/features/specs) - excellent for search` });
+  } else if (totalDescriptors >= 1) {
+    score += 6;
+    checks.push({ pass: "warn", text: `Has ${totalDescriptors} descriptor(s) - add more (material, features, or specs)` });
   } else {
     score += 2;
-    checks.push({ pass: "warn", text: "Add material/fabric type (cotton, silk, etc.)" });
+    checks.push({ pass: false, text: "No descriptors found - add material, features, or specs (e.g. cotton, USB, 500ml)" });
   }
 
-  // 7. Has target audience (10 points)
-  const hasAudience = /(women|men|girls|boys|kids|baby|ladies|gents|unisex)/i.test(title);
-  if (hasAudience) {
+  // 7. Has audience OR use case (10 points)
+  const hasAudience = /(women|men|girls|boys|kids|baby|ladies|gents|unisex|children|toddler|infant|adult|teen)/i.test(title);
+  const hasUseCase = /(home|office|travel|outdoor|car|desk|table|kitchen|bedroom|bathroom|gym|workout|camping|school|college|party|wedding|casual|daily|sports|garden|balcony|living room|indoor|gift)/i.test(title);
+
+  if (hasAudience && hasUseCase) {
     score += 10;
-    checks.push({ pass: true, text: "Has target audience - improves search visibility" });
+    checks.push({ pass: true, text: "Has both audience & use case - maximum search visibility" });
+  } else if (hasAudience) {
+    score += 8;
+    checks.push({ pass: true, text: "Has target audience - good for search" });
+  } else if (hasUseCase) {
+    score += 8;
+    checks.push({ pass: true, text: "Has use case - helps buyers find it" });
   } else {
     score += 2;
-    checks.push({ pass: "warn", text: "Add target audience (women, men, kids, etc.)" });
+    checks.push({ pass: "warn", text: "Add who it's for (women, kids, etc.) or where to use (home, office, etc.)" });
   }
 
   // 8. Keyword match from autocomplete (15 points)
   if (cachedKeywords.length > 0) {
-    const matchedKw = cachedKeywords.filter((kw) =>
-      titleLower.includes(kw.toLowerCase())
-    );
+    // Match whole keywords properly - each word of the keyword must be in the title
+    const matchedKw = cachedKeywords.filter((kw) => {
+      const kwWords = kw.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+      return kwWords.length > 0 && kwWords.every((w) => titleLower.includes(w));
+    });
     if (matchedKw.length >= 3) {
       score += 15;
       checks.push({ pass: true, text: `Matches ${matchedKw.length} trending keywords` });

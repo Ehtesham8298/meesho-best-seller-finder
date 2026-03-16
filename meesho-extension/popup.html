@@ -523,20 +523,12 @@
         <input type="text" class="seo-input" id="keywordInput" placeholder="Enter seed keyword (e.g. kurti, saree)">
         <button class="seo-btn" id="keywordSearchBtn">Search</button>
       </div>
-      <div id="autocompleteResults"></div>
-    </div>
-
-    <div class="seo-divider"></div>
-
-    <!-- Competitor Analysis -->
-    <div class="seo-section">
-      <div class="seo-section-title">Competitor Keyword Analysis</div>
-      <p style="font-size:11px;color:#888;margin-bottom:8px;">Analyzes top products' titles for a keyword to find winning words</p>
-      <div class="seo-input-row">
-        <input type="text" class="seo-input" id="competitorInput" placeholder="Enter product keyword (e.g. kurti)">
-        <button class="seo-btn" id="competitorBtn">Analyze</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+        <label style="font-size:10px;color:#570A57;font-weight:600;white-space:nowrap;">Analyze top:</label>
+        <input type="number" id="kwAnalyzeCount" value="15" min="5" max="50" step="5" style="width:55px;padding:4px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:center;">
+        <span style="font-size:10px;color:#888;">keywords (zyada = zyada data, zyada time)</span>
       </div>
-      <div id="competitorResults"></div>
+      <div id="autocompleteResults"></div>
     </div>
 
     <div class="seo-divider"></div>
@@ -553,12 +545,12 @@
         <div class="seo-score-fill" id="seoScoreFill" style="width:0%"></div>
       </div>
       <div class="score-label" id="seoScoreLabel">-</div>
-      <div id="seoKeywordsUsed" style="margin-top:6px"></div>
-      <ul class="seo-tips" id="seoTips"></ul>
       <div style="margin-top:10px; display:flex; gap:8px;">
         <button class="seo-btn" id="optimizeTitleBtn">Analyze Title</button>
         <button class="seo-btn-outline" id="copyTitleBtn">Copy Title</button>
       </div>
+      <div id="seoKeywordsUsed" style="margin-top:6px"></div>
+      <ul class="seo-tips" id="seoTips"></ul>
     </div>
   </div>
 
